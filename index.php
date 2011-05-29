@@ -34,8 +34,10 @@ class Article
     private function printing ($article_result_array)
     {
         header('Content-Type: text/html; charset=utf-8');
+        echo "<html>";
         foreach ($article_result_array as $string)
             echo $string."<br/>\n";
+        echo "</html>";
     }
 }
 
@@ -50,7 +52,7 @@ class Dictionary
 
     function __construct($dictionary_file_path)
     {
-         if (file_exists($dictionary_file_path) && is_readable($dictionary_file_path))
+        if (file_exists($dictionary_file_path) && is_readable($dictionary_file_path))
         {
             $dictionary_resource_file = fopen($dictionary_file_path, 'r');
             $dictionary_text = fread($dictionary_resource_file, filesize($dictionary_file_path));
