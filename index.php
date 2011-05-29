@@ -84,7 +84,7 @@ $article_result_array = $article->processing($dictionary->getDictionaryTextArray
 
 $time_end = microtime(true);
 $time = $time_end - $time_start;
-echo "Что-то делал $time секунд\n";
+echo "Скрипт выполнялся $time секунд\n";
 
 
 /*
