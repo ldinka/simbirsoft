@@ -1,5 +1,12 @@
 <?php
 
+header('Content-Type: text/html; charset=utf-8');
+
+ini_set('max_execution_time',0);
+set_time_limit(0);
+error_reporting(E_ALL);
+ini_set('display_errors',"1");
+
 class Article
 {
     private $article_text_array = array();
@@ -33,7 +40,6 @@ class Article
 
     private function printing ($article_result_array)
     {
-        header('Content-Type: text/html; charset=utf-8');
         echo "<html><pre>";
         foreach ($article_result_array as $string)
             echo $string.".\n";
@@ -69,12 +75,6 @@ class Dictionary
             echo "Dictionary file is not readable!";
     }
 }
-
-
-ini_set('max_execution_time',0);
-set_time_limit(0);
-error_reporting(E_ALL);
-ini_set('display_errors',"1");
 
 $time_start = microtime(true);
 
