@@ -11,7 +11,7 @@ class Article
         {
             $article_file_resource = fopen($article_file_path, 'r');
             $article_text = fread($article_file_resource, filesize($article_file_path));
-            $article_text_array = explode("\n", $article_text);
+            $article_text_array = explode(".", $article_text);
             fclose($article_file_resource);
             $this->article_text_array = $article_text_array;
         }
@@ -24,7 +24,7 @@ class Article
         foreach ($this->article_text_array as $key => $string)
             foreach ($dictionary_text_array as $word)
             {
-                $pattern = '~(^|\s)('.$word.')(\s|$)~';
+                $pattern = '~(^|\s)('.$word.')(\s|$)~u';
                 $string = preg_replace($pattern, "\\1<b><i>\\2</i></b>\\3" , $string);
                 $result_article[$key] = $string;
             }
@@ -34,10 +34,10 @@ class Article
     private function printing ($article_result_array)
     {
         header('Content-Type: text/html; charset=utf-8');
-        echo "<html>";
+        echo "<html><pre>";
         foreach ($article_result_array as $string)
-            echo $string."<br/>\n";
-        echo "</html>";
+            echo $string.".\n";
+        echo "</pre></html>";
     }
 }
 
@@ -55,9 +55,14 @@ class Dictionary
         if (file_exists($dictionary_file_path) && is_readable($dictionary_file_path))
         {
             $dictionary_resource_file = fopen($dictionary_file_path, 'r');
-            $dictionary_text = fread($dictionary_resource_file, filesize($dictionary_file_path));
-            $dictionary_text_array = explode("\n", $dictionary_text);
+            $file_size = filesize($dictionary_file_path);
+            $dictionary_text = fread($dictionary_resource_file, $file_size);
             fclose($dictionary_resource_file);
+
+            $dictionary_text = str_replace("\n", " ", $dictionary_text);
+            $new_text = wordwrap($dictionary_text, 32000, "///");
+            $new_text = str_replace(" ", "|", $new_text);
+            $dictionary_text_array = explode("///", $new_text);
             $this->dictionary_text_array = $dictionary_text_array;
         }
         else
@@ -74,8 +79,11 @@ ini_set('display_errors',"1");
 $time_start = microtime(true);
 
 
+echo "<h1>GUI</h1>";
+echo "<p><label></label></p>";
+
 $article_file_path = './files/article.txt';
-$dictionary_file_path = './files/dictionary_small.txt';
+$dictionary_file_path = './files/dictionary.txt';
 
 $article    = new Article($article_file_path);
 $dictionary = new Dictionary($dictionary_file_path);
@@ -83,19 +91,6 @@ $dictionary = new Dictionary($dictionary_file_path);
 $article_result_array = $article->processing($dictionary->getDictionaryTextArray());
 
 
-
 $time_end = microtime(true);
 $time = $time_end - $time_start;
 echo "Скрипт выполнялся $time секунд\n";
-
-
-/*
-$all_dict = implode("|", $arr_dictionary);
-foreach ($arr_article as $key => $string)
-{
-    $pattern = '~(^|\s)('.$all_dict.')(\s|$)~';
-    $string = preg_replace($pattern, "\\1<b><i>\\2</i></b>\\3" , $string);
-
-    $result_article[$key] = $string;
-}
-*/
