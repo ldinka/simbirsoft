@@ -30,6 +30,8 @@
 
 header('Content-Type: text/html; charset=utf-8');
 
+ini_set("upload_max_filesize", "2M");
+ini_set("post_max_size", "4M");
 
 ini_set('safe_mode_gid',"1");
 ini_set('safe_mode',"1");
@@ -67,7 +69,7 @@ class Article
         foreach ($this->article_text_array as $key => $string)
             foreach ($dictionary_text_array as $word)
             {
-                $pattern = '~(^|[^\p{L}])('.$word.')([^\p{L}]|$)~ui';
+                $pattern = '~(^|[^\p{L}_])('.$word.')([^\p{L}_]|$)~ui';
                 //$pattern = '~(?<!\p{L})('.$word.')(?!\p{L})~u';
 
                 //preg_match_all($pattern, $string, $matches);
@@ -102,12 +104,41 @@ class Dictionary
     {
         if (file_exists($dictionary_file_path) && is_readable($dictionary_file_path))
         {
-            $dictionary_resource_file = fopen($dictionary_file_path, 'r');
-            $file_size = filesize($dictionary_file_path);
-            $dictionary_text = fread($dictionary_resource_file, $file_size);
-            fclose($dictionary_resource_file);
+            $dictionary_array = file($dictionary_file_path);
+            if (count($dictionary_array) > 100000)
+            {
+                echo "<p>Количество строк превышает допустимое значение длины. Файл словаря будет обрезан до допустимый длины.</p>";
+                $dictionary_array = array_slice($dictionary_array, 0, 100000);
+            }
 
-            $dictionary_text = str_replace("\n", " ", $dictionary_text);
+            $dictionary_array = array_unique($dictionary_array);
+
+            $temp_array = array();
+            foreach ($dictionary_array as $word)
+            {
+                $word = trim($word);
+                if (preg_match("~\s~", $word))
+                {
+                    $word = preg_quote($word);
+                    $word = preg_replace("~\s~", "///", $word);
+                    $word_array = explode("///", $word);
+                    if (!empty($word_array))
+                    {
+                        foreach ($word_array as $word_array_item)
+                        {
+                            $word_array_item = trim($word_array_item);
+                            if ($word_array_item)
+                                $temp_array[] = $word_array_item;
+                        }
+                    }
+                }
+                elseif ($word) $temp_array[] = $word;
+            }
+
+            $dictionary_array = $temp_array;
+            $dictionary_array = array_unique($dictionary_array);
+
+            $dictionary_text = implode(" ", $dictionary_array);
             $new_text = wordwrap($dictionary_text, 32000, "///");
             $new_text = str_replace(" ", "|", $new_text);
             $dictionary_text_array = explode("///", $new_text);
@@ -125,8 +156,8 @@ if (!$_REQUEST['go'])
 {
     echo '<h1>Graphical User Interface</h1>';
     echo '<form action="/" method="post" enctype="multipart/form-data">';
-    echo '<p><label>Загрузить файл статьи, (не более 2Мб)</label><input type="file" name="article"/></p>';
-    echo '<p><label>Загрузить файл словаря, (не более 2Мб)</label><input type="file" name="dictionary"/></p>';
+    echo '<p><label>Загрузить файл статьи (не более 2Мб)</label><input type="file" name="article"/></p>';
+    echo '<p><label>Загрузить файл словаря (не более 2Мб)</label><input type="file" name="dictionary"/></p>';
     echo '<input type="hidden" name="go" value="1"/>';
     echo '<p></p><input type="submit"/></p>';
     echo '</form>';
@@ -134,15 +165,42 @@ if (!$_REQUEST['go'])
 else {
     if ($_FILES)
     {
-        f_print_r($_FILES);
-        if ($_FILES["article"]["size"]>2097152 ||
-            $_FILES["dictionary"]["size"]>2097152 ||
-            $_FILES["article"]["error"] == 1 ||
-            $_FILES["dictionary"]["error"] == 1)
+        if ($_FILES["dictionary"]["error"] || $_FILES["article"]["error"])
         {
-            echo "<p>Недопустимый размер файла!</p>";
-            exit;
+            switch ($_FILES["dictionary"]["error"])
+            {
+                case 1:
+                    echo "<p>Недопустимый размер файла словаря!</p>";
+                    break;
+                case 2:
+                    echo "<p>Недопустимый размер файла словаря!</p>";
+                    break;
+                case 3:
+                    echo "<p>Загружаемый файл словаря был получен только частично. </p>";
+                    break;
+                case 4:
+                    echo "<p>Файл словаря не был загружен.</p>";
+                    break;
+            }
+            switch ($_FILES["article"]["error"])
+            {
+                case 1:
+                    echo "<p>Недопустимый размер файла статьи!</p>";
+                    exit;
+                case 2:
+                    echo "<p>Недопустимый размер файла статьи!</p>";
+                    exit;
+                case 3:
+                    echo "<p>Загружаемый файл статьи был получен только частично. </p>";
+                    exit;
+                case 4:
+                    echo "<p>Файл статьи не был загружен.</p>";
+                    exit;
+                default:
+                    exit;
+            }
         }
+
         $files_dir = "./files00/";
         $dictionary_file = $files_dir."dictionary.txt";
         $article_file = $files_dir."article.txt";
@@ -153,11 +211,20 @@ else {
             chmod($files_dir, 0777);
         }
         if (!move_uploaded_file($_FILES["dictionary"]["tmp_name"], $dictionary_file))
+        {
             echo "<p>Ошибка загрузки файла словаря!</p>";
-        else chmod($dictionary_file, 0777);
+            exit;
+        }
+        else
+        {
+            chmod($dictionary_file, 0777);
+        }
 
         if (!move_uploaded_file($_FILES["article"]["tmp_name"], $article_file))
+        {
             echo "<p>Ошибка загрузки файла статьи!</p>";
+            exit;
+        }
         else chmod($article_file, 0777);
     }
 
@@ -166,15 +233,6 @@ else {
 
     $article_result_array = $article->processing($dictionary->getDictionaryTextArray());
 
-    /*
-    $article_file_path = './files/article.txt';
-    $dictionary_file_path = './files/dictionary.txt';
-
-    $article    = new Article($article_file_path);
-    $dictionary = new Dictionary($dictionary_file_path);
-
-    $article_result_array = $article->processing($dictionary->getDictionaryTextArray());
-    */
 }
 
 $time_end = microtime(true);
@@ -182,6 +240,7 @@ $time = $time_end - $time_start;
 echo "<p>Скрипт выполнялся $time секунд\n</p>";
 
 //unlink($dictionary_file);
+//unlink($article_file);
 //rmdir($files_dir);
 
 
