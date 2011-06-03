@@ -9,7 +9,7 @@
  
 class Article
 {
-    const HEADER = '
+    private $header = '
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
         <head>
@@ -39,7 +39,7 @@ class Article
         </head>
         <body>
     ';
-    const FOOTER = '
+    private $footer = '
         </body>
         </html>
     ';
@@ -124,12 +124,13 @@ class Article
         $result_string = str_replace("\n", "<br/>\n", $result_string);
         $main_array = explode("\n", $result_string);
         $chunks = array_chunk($main_array, $this->number_of_strings);
+        $path = dirname(__FILE__);
         echo "<p>Pages: ";
         foreach ($chunks as $key => $chunk)
         {
-            $file_name = "./files00/".($key+1).".html";
+            $file_name = $path."/files00/".($key+1).".html";
             $resource_html_file = fopen($file_name, "w");
-            fwrite($resource_html_file, HEADER . implode("\n", $chunk) . FOOTER);
+            fwrite($resource_html_file, $this->header . implode("\n", $chunk) . $this->footer);
             fclose($resource_html_file);
             chmod($file_name, 0666);
             echo ' <a target="_blank" href="files00/'.($key+1).'.html" class="link01">'.($key+1).'</a> ' ;
