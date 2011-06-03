@@ -74,7 +74,7 @@ class Utils
     static function init_gui()
     {
         return  '<h1>Graphical User Interface</h1>
-        <form action="/" method="post" enctype="multipart/form-data">
+        <form action="index.php" method="post" enctype="multipart/form-data">
         <p><label>Загрузить файл статьи (не более 2Мб)</label><input type="file" name="article"/></p>
         <p><label>Загрузить файл словаря (не более 2Мб)</label><input type="file" name="dictionary"/></p>
         <p><label>Количество выводимых строк (10-100000)</label><input type="text" name="number_of_strings" value="'.(isset($_REQUEST['number_of_strings'])?intval($_REQUEST['number_of_strings']):100).'"/></p>
