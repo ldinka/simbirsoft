@@ -129,7 +129,7 @@ class Article
         {
             $file_name = "./files00/".($key+1).".html";
             $resource_html_file = fopen($file_name, "w");
-            fwrite($resource_html_file, $this::HEADER . implode("\n", $chunk) . $this::FOOTER);
+            fwrite($resource_html_file, HEADER . implode("\n", $chunk) . FOOTER);
             fclose($resource_html_file);
             chmod($file_name, 0666);
             echo ' <a target="_blank" href="files00/'.($key+1).'.html" class="link01">'.($key+1).'</a> ' ;
