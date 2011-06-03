@@ -67,7 +67,9 @@ if (isset($_REQUEST['go']))
         }
     }
 
-    $files_dir = "./files00/";
+    $path = dirname(__FILE__);
+
+    $files_dir = $path."/files00/";
     $dictionary_file = $files_dir."dictionary.txt";
     $article_file = $files_dir."article.txt";
 
