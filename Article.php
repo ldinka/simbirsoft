@@ -108,12 +108,22 @@ class Article
     public function processing($dictionary_text_array)
     {
         foreach ($this->article_text_array as $key => $string)
+        {
             foreach ($dictionary_text_array as $word)
             {
-                $pattern = '~(^|[^\p{L}_])('.$word.')([^\p{L}_]|$)~ui';
+                //$pattern = '~(^|[^\p{L}_\d]|\(|\s*)('.$word.')([^\p{L}_\d]|$|\s+|\))~ui';
+                $pattern = '~(^|[^\p{L}_\d])('.$word.')([^\p{L}_\d]|$)~ui';
                 $string = preg_replace($pattern, "\\1<b><i>\\2</i></b>\\3" , $string);
                 $this->result_article[$key] = $string;
             }
+            foreach ($dictionary_text_array as $word)
+            {
+                //$pattern = '~(^|[^\p{L}_\d]|\(|\s*)('.$word.')([^\p{L}_\d]|$|\s+|\))~ui';
+                $pattern = '~(^|[^\p{L}_\d>])('.$word.')([^\p{L}_\d<]|$)~ui';
+                $string = preg_replace($pattern, "\\1<b><i>\\2</i></b>\\3" , $string);
+                $this->result_article[$key] = $string;
+            }
+        }
         $this->printing();
     }
 

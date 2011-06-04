@@ -53,21 +53,20 @@ class Utils
                     display: none;
                 }
             </style>
-
-            </head>
-            <body>';
-    }
-
-    static function init_footer()
-    {
-        return '<script type="text/javascript">
+            <script type="text/javascript">
                 function viewPreloader()
                 {
                     document.getElementById("submit").style.display = "none";
                     document.getElementById("preloader").style.display = "block";
                 }
             </script>
-            </body>
+            </head>
+            <body>';
+    }
+
+    static function init_footer()
+    {
+        return '</body>
             </html>';
     }
 

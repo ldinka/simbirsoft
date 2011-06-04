@@ -43,10 +43,10 @@ class Dictionary
             foreach ($dictionary_array as $word)
             {
                 $word = trim($word);
-                if (preg_match("~[^\p{L}^_^ ]~ui", $word))
+                if (preg_match("~[^\p{L}_0-9\s+]~ui", $word))
                 {
                     $word = preg_quote($word);
-                    $word = preg_replace("~[^\p{L}^_^ ]~ui", "", $word);
+                    $word = preg_replace("~[^\p{L}_0-9\s+]~ui", " ", $word);
                     $word_array = preg_split("~\s~", $word);
                     if (!empty($word_array))
                     {
@@ -60,12 +60,10 @@ class Dictionary
                 }
                 elseif ($word) $temp_array[] = $word;
             }
-
             $dictionary_array = $temp_array;
             $dictionary_array = array_unique($dictionary_array);
-
             $dictionary_text = implode(" ", $dictionary_array);
-            $new_text = wordwrap($dictionary_text, 32000, "///");
+            $new_text = wordwrap($dictionary_text, 1000, "///");
             $new_text = str_replace(" ", "|", $new_text);
             $dictionary_text_array = explode("///", $new_text);
             $dictionary_text_array = array_unique($dictionary_text_array);
