@@ -9,7 +9,7 @@
  
 class View
 {
-    function show_header()
+    function showHeader()
     {
         echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -62,13 +62,13 @@ class View
             <body>';
     }
 
-    function show_footer()
+    function showFooter()
     {
         echo '</body>
             </html>';
     }
 
-    function show_error($err)
+    function showError($err)
     {
         foreach($err as $error)
         {
@@ -76,12 +76,12 @@ class View
         }
     }
 
-    function show_pages($pages)
+    function showPages($pages)
     {
         echo $pages;
     }
 
-    function show_gui()
+    function showGUI()
     {
         echo  '<h1>Graphical User Interface</h1>
         <form action="index.php" method="post" enctype="multipart/form-data">

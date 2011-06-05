@@ -20,8 +20,8 @@ class Controller
     {
         $time_start = microtime(true);
 
-        $this->view->show_header();
-        $this->view->show_gui();
+        $this->view->showHeader();
+        $this->view->showGUI();
 
         try
         {
@@ -36,7 +36,7 @@ class Controller
         $time     = $time_end - $time_start;
         echo "<p>Скрипт выполнялся $time секунд\n</p>";
 
-        $this->view->show_footer();
+        $this->view->showFooter();
 
     }
 
@@ -112,11 +112,11 @@ class Controller
                 $article->setNumberOfStrings(intval($_REQUEST['number_of_strings'])?intval($_REQUEST['number_of_strings']):1000);
 
                 $pages = $article->processing($dictionary->getDictionaryTextArray());
-                $this->view->show_pages($pages);
+                $this->view->showPages($pages);
             }
             else
             {
-                $this->view->show_error($err);
+                $this->view->showError($err);
             }
         }
     }
