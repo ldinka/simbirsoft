@@ -63,10 +63,7 @@ class Article
                 do
                 {
                     $article_text = fread($article_file_resource, 32768);
-                    $temp_string = mb_strrchr($article_text, '.');
-                    if ($temp_string && $temp_string != '.')
-                        $temp_string = mb_strrchr($article_text, '.', true).'.';
-                    elseif (mb_strrchr($article_text, ' ') && mb_strrchr($article_text, ' ') != ' ')
+                    if (mb_strrchr($article_text, ' ') && mb_strrchr($article_text, ' ') != ' ')
                         $temp_string = mb_strrchr($article_text, ' ', true).' ';
                     else
                         $temp_string = $article_text;
@@ -111,14 +108,12 @@ class Article
         {
             foreach ($dictionary_text_array as $word)
             {
-                //$pattern = '~(^|[^\p{L}_\d]|\(|\s*)('.$word.')([^\p{L}_\d]|$|\s+|\))~ui';
                 $pattern = '~(^|[^\p{L}_\d])('.$word.')([^\p{L}_\d]|$)~ui';
                 $string = preg_replace($pattern, "\\1<b><i>\\2</i></b>\\3" , $string);
                 $this->result_article[$key] = $string;
             }
             foreach ($dictionary_text_array as $word)
             {
-                //$pattern = '~(^|[^\p{L}_\d]|\(|\s*)('.$word.')([^\p{L}_\d]|$|\s+|\))~ui';
                 $pattern = '~(^|[^\p{L}_\d>])('.$word.')([^\p{L}_\d<]|$)~ui';
                 $string = preg_replace($pattern, "\\1<b><i>\\2</i></b>\\3" , $string);
                 $this->result_article[$key] = $string;
@@ -133,17 +128,67 @@ class Article
         $result_string = implode("", $article_result_array);
         $result_string = str_replace("\n", "<br/>\n", $result_string);
         $main_array = explode("\n", $result_string);
-        $chunks = array_chunk($main_array, $this->number_of_strings);
+
         $path = dirname(__FILE__);
         echo "<p>Pages: ";
-        foreach ($chunks as $key => $chunk)
+        $k = 0;
+        $sign_arr = array(
+                    '.' , '?' , '!' , '…' ,
+                    '.»', '?»', '!»', '…»',
+                    '."', '?"', '!"', '…"'
+                );
+        while (count($main_array) > 0)
         {
-            $file_name = $path."/files00/".($key+1).".html";
-            $resource_html_file = fopen($file_name, "w");
-            fwrite($resource_html_file, $this->header . implode("\n", $chunk) . $this->footer);
-            fclose($resource_html_file);
-            chmod($file_name, 0666);
-            echo ' <a target="_blank" href="files00/'.($key+1).'.html" class="link01">'.($key+1).'</a> ' ;
+            $temp_array = array_slice($main_array, 0, $this->number_of_strings);
+            $temp_string = implode("\n", $temp_array);
+            if (count($main_array) > $this->number_of_strings)
+            {
+                $main_array = array_slice($main_array, $this->number_of_strings);
+                $part_str = ""; $arr = array(); $arr2 = array();
+                foreach ($sign_arr as $key => $sign)
+                {
+                    if (mb_strrchr($temp_string, $sign))
+                    {
+                        if (mb_strrchr($temp_string, $sign) != $sign."<br/>")
+                        {
+                            $arr[$key] = mb_strlen(mb_strrchr($temp_string, $sign, true).$sign);
+                            $arr2[] = mb_strrchr($temp_string, $sign, true).$sign;
+                            $part_str = "";
+                        }
+                        else
+                            $part_str = $temp_string;
+                    }
+                }
+                if (empty($arr))
+                    $part_str = $temp_string;
+                elseif (!$part_str)
+                {
+                    arsort($arr);
+                    $number_of_sign = array_shift(array_keys($arr));
+                    $sgn = $sign_arr[$number_of_sign];
+                    $another_part_str = mb_strrchr($temp_string, $sgn);
+                    $part_str = mb_strrchr($temp_string, $sgn, true).$sgn;
+                    $another_part_str = preg_replace("~^".preg_quote($sgn)."\s*(\<br/\>\n)*~", "", $another_part_str);
+                    $begin_array = explode("\n", $another_part_str);
+                    $main_array = array_merge($begin_array, $main_array);
+                }
+            }
+            else
+            {
+                $part_str = $temp_string;
+                $main_array = array();
+            }
+            if ($part_str)
+            {
+                $k++;
+                $file_name = $path."/files00/".$k.".html";
+                $resource_html_file = fopen($file_name, "w");
+                fwrite($resource_html_file, $this->header . $part_str . $this->footer);
+                fclose($resource_html_file);
+                chmod($file_name, 0666);
+                echo ' <a target="_blank" href="files00/'.$k.'.html" class="link01">'.$k.'</a> ' ;
+            }
+
         }
         echo "</p>";
     }

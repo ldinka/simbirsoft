@@ -78,7 +78,8 @@ class Utils
         <p><label>Загрузить файл словаря (не более 2Мб)</label><input type="file" name="dictionary"/></p>
         <p><label>Количество выводимых строк (10-100000)</label><input type="text" name="number_of_strings" value="'.(isset($_REQUEST['number_of_strings'])?intval($_REQUEST['number_of_strings']):100).'"/></p>
         <input type="hidden" name="go" value="1"/>
-        <p><input type="submit" id="submit" onClick="viewPreloader()"/><img id="preloader" src="preloader.gif" /></p>
+        <p><input type="submit" id="submit" onClick="viewPreloader()"/>
+           <img id="preloader" src="preloader.gif" alt="Идет обработка, подождите..." /></p>
         </form>';
     }
 }
