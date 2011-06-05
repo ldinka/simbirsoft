@@ -1,9 +1,9 @@
 <?php
 
-header('Content-Type: text/html; charset=utf-8');
+header('Content-Type: text/html; charset=utf-8');   # установка кодировки для вывода скрипта
 
-ini_set("upload_max_filesize", "2M");
-ini_set("post_max_size", "4M");
+ini_set("upload_max_filesize", "2M");               # установка максимального размера загружаемого файла
+ini_set("post_max_size", "4M");                     # установка максимального размера передаваемого массива данных POST
 
 ini_set('safe_mode_gid',"1");
 ini_set('safe_mode',"1");
@@ -20,7 +20,6 @@ require_once("Utils.php");
 $time_start = microtime(true);
 
 echo Utils::init_header();
-
 echo Utils::init_gui();
 
 
