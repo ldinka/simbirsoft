@@ -21,4 +21,3 @@ require_once("Utils.php");
 
 $controller = new Controller();
 $controller->init();
-
