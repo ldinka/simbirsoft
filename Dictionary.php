@@ -7,7 +7,6 @@
  * To change this template use File | Settings | File Templates.
  */
 
-
 class Dictionary
 {
     private $dictionary_text_array;
@@ -30,6 +29,11 @@ class Dictionary
     {
         if (file_exists($dictionary_file_path) && is_readable($dictionary_file_path))
         {
+            $file_size = filesize($dictionary_file_path);
+
+            if($file_size==0)
+                throw new Exception("Dictionary filesize must be more than zero bytes");
+
             $dictionary_array = file($dictionary_file_path);
             if (count($dictionary_array) > 100000)
             {
@@ -45,8 +49,8 @@ class Dictionary
                 $word = trim($word);
                 if (preg_match("~[^\p{L}_0-9\s+]~ui", $word))
                 {
-                    $word = preg_quote($word);
-                    $word = preg_replace("~[^\p{L}_0-9\s+]~ui", " ", $word);
+                    $word       = preg_quote($word);
+                    $word       = preg_replace("~[^\p{L}_0-9\s+]~ui", " ", $word);
                     $word_array = preg_split("~\s~", $word);
                     if (!empty($word_array))
                     {
@@ -62,14 +66,17 @@ class Dictionary
             }
             $dictionary_array = $temp_array;
             $dictionary_array = array_unique($dictionary_array);
-            $dictionary_text = implode(" ", $dictionary_array);
-            $new_text = wordwrap($dictionary_text, 1000, "///");
+            $dictionary_text  = implode(" ", $dictionary_array);
+
+            $new_text = wordwrap($dictionary_text, 32000, "///");
             $new_text = str_replace(" ", "|", $new_text);
+
             $dictionary_text_array = explode("///", $new_text);
             $dictionary_text_array = array_unique($dictionary_text_array);
+
             $this->dictionary_text_array = $dictionary_text_array;
         }
         else
-            echo "Dictionary file is not readable!";
+            throw new Exception("Dictionary file is not readable!");
     }
 }

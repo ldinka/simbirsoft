@@ -48,6 +48,8 @@ class Article
     private $result_article     = array();
     private $number_of_strings;
 
+    private $pages_str = "";
+
     /**
      * constructor
      * @param path of article file
@@ -56,9 +58,10 @@ class Article
     {
         if (file_exists($article_file_path) && is_readable($article_file_path))
         {
-            $file_size = filesize($article_file_path);
+            $file_size             = filesize($article_file_path);
             $article_file_resource = fopen($article_file_path, 'r');
-            $part_size = 0;
+            $part_size             = 0;
+            
             if ($file_size > 32768)
                 do
                 {
@@ -72,7 +75,12 @@ class Article
                     $article_text_array[] = $temp_string;
                 }
                 while ($part_size < $file_size);
-            else $article_text_array[] = fread($article_file_resource, $file_size);
+            else
+            {
+                if($file_size==0)
+                    throw new Exception("Article file size must be more than zero bytes");
+                $article_text_array[] = fread($article_file_resource, $file_size);
+            }
             fclose($article_file_resource);
             $this->article_text_array = $article_text_array;
         }
@@ -120,17 +128,20 @@ class Article
             }
         }
         $this->printing();
+        return $this->pages_str;
     }
 
     private function printing()
     {
         $article_result_array = $this->result_article;
-        $result_string = implode("", $article_result_array);
-        $result_string = str_replace("\n", "<br/>\n", $result_string);
-        $main_array = explode("\n", $result_string);
+        $result_string        = implode("", $article_result_array);
+        $result_string        = str_replace("\n", "<br/>\n", $result_string);
+        $main_array           = explode("\n", $result_string);
 
         $path = dirname(__FILE__);
-        echo "<p>Pages: ";
+
+        $this->pages_str = "<p>Pages: ";
+
         $k = 0;
         $sign_arr = array(
                     '.' , '?' , '!' , '…' ,
@@ -139,12 +150,14 @@ class Article
                 );
         while (count($main_array) > 0)
         {
-            $temp_array = array_slice($main_array, 0, $this->number_of_strings);
+            $temp_array  = array_slice($main_array, 0, $this->number_of_strings);
             $temp_string = implode("\n", $temp_array);
+
             if (count($main_array) > $this->number_of_strings)
             {
                 $main_array = array_slice($main_array, $this->number_of_strings);
-                $part_str = ""; $arr = array(); $arr2 = array();
+                $part_str   = ""; $arr = array();
+
                 foreach ($sign_arr as $key => $sign)
                 {
                     if (mb_strrchr($temp_string, $sign))
@@ -152,44 +165,43 @@ class Article
                         if (mb_strrchr($temp_string, $sign) != $sign."<br/>")
                         {
                             $arr[$key] = mb_strlen(mb_strrchr($temp_string, $sign, true).$sign);
-                            $arr2[] = mb_strrchr($temp_string, $sign, true).$sign;
-                            $part_str = "";
+                            $part_str  = "";
                         }
                         else
                             $part_str = $temp_string;
                     }
                 }
+
                 if (empty($arr))
                     $part_str = $temp_string;
                 elseif (!$part_str)
                 {
                     arsort($arr);
-                    $number_of_sign = array_shift(array_keys($arr));
-                    $sgn = $sign_arr[$number_of_sign];
+                    $number_of_sign   = array_shift(array_keys($arr));
+                    $sgn              = $sign_arr[$number_of_sign];
                     $another_part_str = mb_strrchr($temp_string, $sgn);
-                    $part_str = mb_strrchr($temp_string, $sgn, true).$sgn;
+                    $part_str         = mb_strrchr($temp_string, $sgn, true).$sgn;
                     $another_part_str = preg_replace("~^".preg_quote($sgn)."\s*(\<br/\>\n)*~", "", $another_part_str);
-                    $begin_array = explode("\n", $another_part_str);
-                    $main_array = array_merge($begin_array, $main_array);
+                    $begin_array      = explode("\n", $another_part_str);
+                    $main_array       = array_merge($begin_array, $main_array);
                 }
             }
             else
             {
-                $part_str = $temp_string;
+                $part_str   = $temp_string;
                 $main_array = array();
             }
             if ($part_str)
             {
                 $k++;
-                $file_name = $path."/files00/".$k.".html";
+                $file_name          = $path."/files00/".$k.".html";
                 $resource_html_file = fopen($file_name, "w");
                 fwrite($resource_html_file, $this->header . $part_str . $this->footer);
                 fclose($resource_html_file);
                 chmod($file_name, 0666);
-                echo ' <a target="_blank" href="files00/'.$k.'.html" class="link01">'.$k.'</a> ' ;
+                $this->pages_str .= ' <a target="_blank" href="files00/'.$k.'.html" class="link01">'.$k.'</a> ' ;
             }
-
         }
-        echo "</p>";
+        $this->pages_str .= "</p>";
     }
 }
