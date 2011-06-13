@@ -32,7 +32,7 @@ class Dictionary
             $file_size = filesize($dictionary_file_path);
 
             if($file_size==0)
-                throw new Exception("Dictionary filesize must be more than zero bytes");
+                throw new Exception("Dictionary filesize must be more than zero bytes!");
 
             $dictionary_array = file($dictionary_file_path);
             if (count($dictionary_array) > 100000)
@@ -43,6 +43,8 @@ class Dictionary
 
             $dictionary_array = array_unique($dictionary_array);
 
+
+            
             $temp_array = array();
             foreach ($dictionary_array as $word)
             {
@@ -58,7 +60,7 @@ class Dictionary
                         {
                             $word_array_item = trim($word_array_item);
                             if ($word_array_item)
-                                $temp_array[] = $word_array_item;
+                                $temp_array[] = mysql_real_escape_string($word_array_item);
                         }
                     }
                 }
@@ -66,6 +68,17 @@ class Dictionary
             }
             $dictionary_array = $temp_array;
             $dictionary_array = array_unique($dictionary_array);
+
+
+
+
+            $query= 'INSERT IGNORE INTO dictionary (`word`)
+                     VALUES ("'.implode('") , ("', $dictionary_array).'")';
+
+            mysql_query($query);
+
+
+            
             $dictionary_text  = implode(" ", $dictionary_array);
 
             $new_text = wordwrap($dictionary_text, 32000, "///");

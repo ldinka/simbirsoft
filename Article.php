@@ -112,21 +112,68 @@ class Article
      */
     public function processing($dictionary_text_array)
     {
+        /*
+        $arr1 = $arr2 = array();
+        $subject1 = $this->article_text_array;
+        foreach ($dictionary_text_array as $word)
+        {
+            $pattern1 = '~(^|[^\p{L}_\d])('.$word.')([^\p{L}_\d]|$)~ui';
+            $arr1[] = preg_replace($pattern1, "\\1<b><i>\\2</i></b>\\3" , $subject1);
+            $arr2[] = preg_filter($pattern1, "\\1(found)\\2(/found)\\3" , $subject1);
+        }
+
+        Utils::f_print_r($arr1);
+        echo "<hr/>";
+        Utils::f_print_r($arr2);
+        echo "<hr/>";
+        */
+
+
+
+
+        $matches1 = $matches2 = array();
         foreach ($this->article_text_array as $key => $string)
         {
             foreach ($dictionary_text_array as $word)
             {
                 $pattern = '~(^|[^\p{L}_\d])('.$word.')([^\p{L}_\d]|$)~ui';
+                preg_match_all('~(^|[^\p{L}_\d])('.$word.')([^\p{L}_\d]|$)~uUi', $string, $temp_array);
+                if (!empty($temp_array))
+                    $matches1[] = $temp_array;
                 $string = preg_replace($pattern, "\\1<b><i>\\2</i></b>\\3" , $string);
                 $this->result_article[$key] = $string;
             }
             foreach ($dictionary_text_array as $word)
             {
                 $pattern = '~(^|[^\p{L}_\d>])('.$word.')([^\p{L}_\d<]|$)~ui';
+                preg_match_all('~(^|[^\p{L}_\d>])('.$word.')([^\p{L}_\d<]|$)~uUi', $string, $temp_array);
+                $matches2[] = $temp_array;
+                if (!empty($temp_array))
+                    $matches2[] = $temp_array;
                 $string = preg_replace($pattern, "\\1<b><i>\\2</i></b>\\3" , $string);
                 $this->result_article[$key] = $string;
             }
         }
+        $matches = array_merge($matches1, $matches2);
+
+        echo "<hr/>";
+
+        $data = array();
+        foreach ($matches as $arr)
+        {
+            $second = $arr[2];
+            if(!empty($second))
+                $data = array_merge($data,$second);
+        }
+
+        $frequency = array_count_values($data);
+
+        foreach ($frequency as $key=>$value)
+        {
+            $sql_str = 'UPDATE `dictionary` SET `frequency`=`frequency`+'.$value.' WHERE word="'.mysql_real_escape_string($key).'"';
+            mysql_query($sql_str) or die(mysql_error());
+        }
+
         $this->printing();
         return $this->pages_str;
     }
@@ -199,7 +246,7 @@ class Article
                 fwrite($resource_html_file, $this->header . $part_str . $this->footer);
                 fclose($resource_html_file);
                 chmod($file_name, 0666);
-                $this->pages_str .= ' <a target="_blank" href="files00/'.$k.'.html" class="link01">'.$k.'</a> ' ;
+                $this->pages_str .= ' <a target="_blank" href="files00/'.$k.'.html" class="link01">'.$k.'</a> ';
             }
         }
         $this->pages_str .= "</p>";

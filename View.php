@@ -42,6 +42,17 @@ class View
                     padding: 5px;
                     text-align: center;
                 }
+                .link02 {
+                    color: #bbb;
+                    display: inline-block;
+                    font-weight: bold;
+                    margin: 5px;
+                    text-transform: uppercase;
+                }
+                .link01.link02 {
+                    color: #00438F;
+                    margin: 5px 3px;
+                }
                 .error {
                     background: #f00;
                     color: #fff;
