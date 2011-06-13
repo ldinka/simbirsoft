@@ -47,8 +47,13 @@ class Article
     private $article_text_array = array();
     private $result_article     = array();
     private $number_of_strings;
+    private $part_of_text = "";
+    private $end_of_text = "";
+    private $number_of_iteration = 0;
 
     private $pages_str = "";
+
+    private $file_path="";
 
     /**
      * constructor
@@ -56,36 +61,51 @@ class Article
      * */
     function __construct($article_file_path)
     {
+        $this->file_path = $article_file_path;
+    }
+
+    public function process($dictionary_text_array)
+    {
+        $article_file_path = $this->file_path;
         if (file_exists($article_file_path) && is_readable($article_file_path))
         {
             $file_size             = filesize($article_file_path);
             $article_file_resource = fopen($article_file_path, 'r');
             $part_size             = 0;
-            
-            if ($file_size > 32768)
+
+            if ($file_size > 1000)
                 do
                 {
-                    $article_text = fread($article_file_resource, 32768);
+                    //$article_text = fread($article_file_resource, 32768);
+                    $article_text = fread($article_file_resource, 1000);
                     if (mb_strrchr($article_text, ' ') && mb_strrchr($article_text, ' ') != ' ')
                         $temp_string = mb_strrchr($article_text, ' ', true).' ';
                     else
                         $temp_string = $article_text;
                     $part_size += mb_strlen($temp_string);
                     fseek($article_file_resource, $part_size);
-                    $article_text_array[] = $temp_string;
+                    if (ftell($article_file_resource) == $file_size)
+                        $temp_string .= "@EOF@";
+                    //echo " * $part_size <br/>";
+                    echo " * $temp_string <br/>";
+                    //$article_text_array[] = $temp_string;
+                    $this->part_of_text = $temp_string;
+                    $this->processing($dictionary_text_array);
                 }
                 while ($part_size < $file_size);
             else
             {
                 if($file_size==0)
                     throw new Exception("Article file size must be more than zero bytes");
-                $article_text_array[] = fread($article_file_resource, $file_size);
+                //$article_text_array[] = fread($article_file_resource, $file_size);
+                $this->part_of_text = fread($article_file_resource, $file_size);
             }
             fclose($article_file_resource);
-            $this->article_text_array = $article_text_array;
+            //$this->article_text_array = $article_text_array;
+            return $this->pages_str;
         }
         else
-            echo "Article file is not readable!";
+            throw new Exception("Article file is not readable!");
     }
 
     /**
@@ -112,48 +132,37 @@ class Article
      */
     public function processing($dictionary_text_array)
     {
-        /*
-        $arr1 = $arr2 = array();
-        $subject1 = $this->article_text_array;
-        foreach ($dictionary_text_array as $word)
-        {
-            $pattern1 = '~(^|[^\p{L}_\d])('.$word.')([^\p{L}_\d]|$)~ui';
-            $arr1[] = preg_replace($pattern1, "\\1<b><i>\\2</i></b>\\3" , $subject1);
-            $arr2[] = preg_filter($pattern1, "\\1(found)\\2(/found)\\3" , $subject1);
-        }
-
-        Utils::f_print_r($arr1);
-        echo "<hr/>";
-        Utils::f_print_r($arr2);
-        echo "<hr/>";
-        */
-
-
-
-
         $matches1 = $matches2 = array();
-        foreach ($this->article_text_array as $key => $string)
-        {
+        Utils::f_flush("<p>Processing ");
+        //foreach ($this->article_text_array as $key => $string)
+        //{
+        $string = $this->part_of_text;
             foreach ($dictionary_text_array as $word)
             {
+                Utils::f_flush(". ");
                 $pattern = '~(^|[^\p{L}_\d])('.$word.')([^\p{L}_\d]|$)~ui';
                 preg_match_all('~(^|[^\p{L}_\d])('.$word.')([^\p{L}_\d]|$)~uUi', $string, $temp_array);
                 if (!empty($temp_array))
                     $matches1[] = $temp_array;
                 $string = preg_replace($pattern, "\\1<b><i>\\2</i></b>\\3" , $string);
-                $this->result_article[$key] = $string;
+                //$this->result_article[$key] = $string;
             }
             foreach ($dictionary_text_array as $word)
             {
+                Utils::f_flush(". ");
                 $pattern = '~(^|[^\p{L}_\d>])('.$word.')([^\p{L}_\d<]|$)~ui';
                 preg_match_all('~(^|[^\p{L}_\d>])('.$word.')([^\p{L}_\d<]|$)~uUi', $string, $temp_array);
                 $matches2[] = $temp_array;
                 if (!empty($temp_array))
                     $matches2[] = $temp_array;
                 $string = preg_replace($pattern, "\\1<b><i>\\2</i></b>\\3" , $string);
-                $this->result_article[$key] = $string;
+                //$this->result_article[$key] = $string;
             }
-        }
+        //}
+        Utils::f_flush("</p>");
+        $this->part_of_text = $string;
+        $this->printing();
+
         $matches = array_merge($matches1, $matches2);
 
         echo "<hr/>";
@@ -174,20 +183,21 @@ class Article
             mysql_query($sql_str) or die(mysql_error());
         }
 
-        $this->printing();
+        //$this->printing();
         return $this->pages_str;
     }
 
     private function printing()
     {
-        $article_result_array = $this->result_article;
-        $result_string        = implode("", $article_result_array);
-        $result_string        = str_replace("\n", "<br/>\n", $result_string);
+        //$article_result_array = $this->result_article;
+        //$result_string        = implode("", $article_result_array);
+        //$result_string        = str_replace("\n", "<br/>\n", $result_string);
+        $result_string        = $this->end_of_text.str_replace("\n", "<br/>\n", $this->part_of_text);
         $main_array           = explode("\n", $result_string);
 
         $path = dirname(__FILE__);
 
-        $this->pages_str = "<p>Pages: ";
+        $this->pages_str .= "<p>Pages: ";
 
         $k = 0;
         $sign_arr = array(
@@ -235,12 +245,20 @@ class Article
             }
             else
             {
-                $part_str   = $temp_string;
+                //$part_str   = $temp_string;
+                $is_it_eof = str_replace("@EOF@", "", $temp_string);
+                if ($temp_string == $is_it_eof)
+                {
+                    $part_str = "";
+                    $this->end_of_text = $temp_string;
+                }
+                else
+                    $part_str = $is_it_eof;
                 $main_array = array();
             }
             if ($part_str)
             {
-                $k++;
+                $k = ++$this->number_of_iteration;
                 $file_name          = $path."/files00/".$k.".html";
                 $resource_html_file = fopen($file_name, "w");
                 fwrite($resource_html_file, $this->header . $part_str . $this->footer);

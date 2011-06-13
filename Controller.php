@@ -47,9 +47,7 @@ class Controller
         {
 
             if (intval($_REQUEST["number_of_strings"]) < 10 || intval($_REQUEST["number_of_strings"]) > 100000)
-            {
                 $err[] = "Укажите количество выводимых строк от 10 до 100000!";
-            }
             if ($_FILES["dictionary"]["error"] || $_FILES["article"]["error"])
             {
                 switch ($_FILES["dictionary"]["error"])
@@ -84,7 +82,7 @@ class Controller
                 }
             }
 
-            if(empty($err))
+            if (empty($err))
             {
                 $path = dirname(__FILE__);
 
@@ -100,24 +98,27 @@ class Controller
 
                 if (!move_uploaded_file($_FILES["article"]["tmp_name"], $article_file))
                     throw new Exception("Ошибка загрузки файла статьи!");
-                chmod($article_file, 0666);
+                else
+                {
+                    chmod($article_file, 0666);
+                    Utils::f_flush("<p>Файл статьи успешно загружен на сервер.</p>");
+                }
 
                 if (!move_uploaded_file($_FILES["dictionary"]["tmp_name"], $dictionary_file))
                     throw new Exception("Ошибка загрузки файла словаря!");
-                chmod($dictionary_file, 0666);
+                else chmod($dictionary_file, 0666);
 
 
                 $dictionary = new Dictionary($dictionary_file);
                 $article    = new Article($article_file);
                 $article->setNumberOfStrings(intval($_REQUEST['number_of_strings'])?intval($_REQUEST['number_of_strings']):1000);
+                $pages = $article->process($dictionary->getDictionaryTextArray());
 
-                $pages = $article->processing($dictionary->getDictionaryTextArray());
+                //$pages = $article->processing($dictionary->getDictionaryTextArray());
                 $this->view->showPages($pages);
             }
             else
-            {
                 $this->view->showError($err);
-            }
         }
     }
 }

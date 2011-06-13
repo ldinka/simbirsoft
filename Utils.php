@@ -16,4 +16,10 @@ class Utils
         echo "</pre>";
     }
 
+    static function f_flush ($string)
+    {
+        echo $string;
+        flush();
+        ob_flush();
+    }
 }

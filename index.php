@@ -8,6 +8,7 @@ ini_set("post_max_size", "4M");                     # установка мак�
 ini_set('safe_mode_gid',"1");
 ini_set('safe_mode',"1");
 ini_set('max_execution_time',0);
+ini_set("output_buffering", "0");
 set_time_limit(0);
 error_reporting(E_ALL);
 ini_set('display_errors',"1");
@@ -33,7 +34,7 @@ $controller->init();
 
 
 
-$number_per_page = 10;
+$number_per_page = 100;
 $number = (isset($_REQUEST["page"]) && intval($_REQUEST["page"]) > 0)?intval($_REQUEST["page"]):1;
 $what = (isset($_REQUEST["what"])&&($_REQUEST["what"] == "word" || $_REQUEST["what"] == "frequency"))?$_REQUEST["what"]:"word";
 $order = (isset($_REQUEST["order"])&&($_REQUEST["order"] == "asc" || $_REQUEST["order"] == "desc"))?$_REQUEST["order"]:"asc";
@@ -77,7 +78,7 @@ echo "<p>Frequency dictionary:</p>";
 $sql_query = "SELECT * FROM `dictionary` ";
 $submit_link = "index.php?";
 
-if ($letter_id)
+if ($letter_id !== "")
 {
     $sql_query .= ' WHERE `word` LIKE "'.$abc_array[$letter_id].'%" ';
     $submit_link .= "letter=$letter_id&";
