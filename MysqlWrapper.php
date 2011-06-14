@@ -17,8 +17,6 @@ class MysqlWrapper {
     private    $pass     = ""; //database login password
     private    $database = ""; //database name
 
-    public    $affected_rows = 0;
-
     private    $link_id = 0;
     private    $query_id = 0;
 
@@ -31,6 +29,8 @@ class MysqlWrapper {
         $this->user     = $user;
         $this->pass     = $pass;
         $this->database = $database;
+
+        $this->connect();
     }
 
     public static function getInstance ($server = null, $user = null, $pass = null, $database = null)
@@ -70,7 +70,6 @@ class MysqlWrapper {
             throw new Exception("<b>MySQL Query fail:</b> $sql_string");
             return 0;
         }
-        $this->affected_rows = mysql_affected_rows($this->link_id);
         return $this->query_id;
     }
 
@@ -83,6 +82,11 @@ class MysqlWrapper {
             $out[] = $row;
 
         return $out;
+    }
+
+    public function mysqlRows ()
+    {
+        return mysql_num_rows($this->query_id);
     }
 
 }

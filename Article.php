@@ -9,11 +9,14 @@
  
 class Article
 {
+    private $time_out = 180; // установка времени (сек.), по истечении которого скрипт заканчивает обработку файлов
+    private $db;
+
     private $header = '
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
         <head>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
         <style>
             html, body {
                 font: 12px/16px Arial;
@@ -60,10 +63,14 @@ class Article
     function __construct($article_file_path)
     {
         $this->file_path = $article_file_path;
+        $this->db = MysqlWrapper::getInstance();
     }
 
     public function process($dictionary_text_array)
     {
+        Utils::f_flush('<p id="process">Processing ');
+         $this->pages_str .= "<p>Pages: ";
+        $time_out = $this->time_out;
         $time_start = microtime(true);
         $article_file_path = $this->file_path;
         if (file_exists($article_file_path) && is_readable($article_file_path))
@@ -74,9 +81,6 @@ class Article
 
             if ($file_size > 32768)
             {
-                $this->pages_str .= "<p>Pages: ";
-                Utils::f_flush("<p>Processing ");
-
                 do
                 {
                     $article_text = fread($article_file_resource, 32768);
@@ -91,8 +95,8 @@ class Article
                     $this->part_of_text = $temp_string;
                     $this->processing($dictionary_text_array);
                 }
-                while ($part_size < $file_size && (microtime(true) - $time_start) < 30);
-                Utils::f_flush("</p>");
+                while ($part_size < $file_size && (microtime(true) - $time_start) < $time_out);
+
                 if ($part_size < $file_size)
                     echo "<p>Скрипт был прерван после $this->number_of_iteration-й итерации</p>";
             }
@@ -100,9 +104,12 @@ class Article
             {
                 if($file_size==0)
                     throw new Exception("Article file size must be more than zero bytes");
-                $this->part_of_text = fread($article_file_resource, $file_size);
+                $this->part_of_text = fread($article_file_resource, $file_size)."@EOF@";
+                $this->processing($dictionary_text_array);
+
             }
             fclose($article_file_resource);
+            Utils::f_flush("</p>");
             $this->pages_str .= "</p>";
             return $this->pages_str;
         }
@@ -172,8 +179,8 @@ class Article
 
         foreach ($frequency as $key=>$value)
         {
-            $sql_str = 'UPDATE `dictionary` SET `frequency`=`frequency`+'.$value.' WHERE word="'.mysql_real_escape_string($key).'"';
-            mysql_query($sql_str) or die(mysql_error());
+            $sql_query = 'UPDATE `dictionary` SET `frequency`=`frequency`+'.$value.' WHERE word="'.mysql_real_escape_string($key).'"';
+            $this->db->dbQuery($sql_query);
         }
         return $this->pages_str;
     }

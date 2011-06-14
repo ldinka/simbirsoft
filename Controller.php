@@ -10,10 +10,12 @@
 class Controller
 {
     private $view;
+    private $db;
 
     function __construct()
     {
         $this->view = new View();
+        $this->db = MysqlWrapper::getInstance();
     }
 
     public function init()
@@ -46,7 +48,14 @@ class Controller
         switch ($module)
         {
             case "fd":
-                $number_per_page = 100;
+                echo '
+                    <div id="header">
+                    <a href="index.php?module=gui" class="link03">Graphical User Interface</a>
+                    <h1>Frequency dictionary</h1>
+                    </div>
+                ';
+                $submit_link = "index.php?module=fd&";
+                $number_per_page = 50;
                 $number = (isset($_REQUEST["page"]) && intval($_REQUEST["page"]) > 0)?intval($_REQUEST["page"]):1;
                 $what = (isset($_REQUEST["what"])&&($_REQUEST["what"] == "word" || $_REQUEST["what"] == "frequency"))?$_REQUEST["what"]:"word";
                 $order = (isset($_REQUEST["order"])&&($_REQUEST["order"] == "asc" || $_REQUEST["order"] == "desc"))?$_REQUEST["order"]:"asc";
@@ -58,15 +67,22 @@ class Controller
 
                 $abc_array = array("а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
 
-                echo "<p>";
-                $temp_array = array();
+                $active_all = "";
+                if ($letter_id === "")
+                    $active_all = " active";
+                echo '<p><a href="'.$submit_link.'" class="link01 link02'.$active_all.'">все</a> ';
+
                 foreach ($abc_array as $key => $letter)
                 {
-                    $mysql_link = mysql_query('SELECT `word` FROM `dictionary` WHERE `word` LIKE "'.$letter.'%" ORDER BY word ASC');
-                    $temp_array = mysql_fetch_assoc($mysql_link);
+                    $this->db->dbQuery('SELECT `word` FROM `dictionary` WHERE `word` LIKE "'.$letter.'%" ORDER BY word ASC');
+
+                    $temp_array = $this->db->fetchAssocArray();
                     if (!empty($temp_array))
                     {
-                        echo ' <a href="index.php?letter='.$key.'" class="link01 link02">'.$letter.'</a> ';
+                        if ($letter_id === $key)
+                            $active = " active";
+                        else $active = "";
+                        echo ' <a href="'.$submit_link.'letter='.$key.'" class="link01 link02'.$active.'">'.$letter.'</a> ';
                     }
                     else
                         echo ' <span class="link02">'.$letter.'</span> ';
@@ -75,7 +91,7 @@ class Controller
 
 
 
-                echo '<form action="index.php" method="post">';
+                echo '<form action="'.$submit_link.'" method="post">';
                 echo '<p><label>Поиск:</label><input type="text" value="'.strip_tags($search).'" name="search"/></p>';
                 echo '<p><label>Частота появления:</label>
                          от<input type="text" value="'.$frequency_from.'" name="frequency_from"/>
@@ -83,12 +99,9 @@ class Controller
                          <input type="submit" value="Поиск"/>
                       </p>';
                 echo '</form>';
-                echo "<p>Frequency dictionary:</p>";
-
-
 
                 $sql_query = "SELECT * FROM `dictionary` ";
-                $submit_link = "index.php?";
+
 
                 if ($letter_id !== "")
                 {
@@ -118,26 +131,16 @@ class Controller
                     }
                 }
 
-                $temp_link = mysql_query($sql_query);
+                $this->db->dbQuery($sql_query);
 
-                $word_array = array();
-                while($row = mysql_fetch_assoc($temp_link))
-                    $word_array[] = $row;
+                $word_array = $this->db->fetchAssocArray();
                 $count = count($word_array);
                 $pages_fd = ceil($count/$number_per_page);
 
-                if ($pages_fd>1)
-                {
-                    echo "<p>";
-                    for ($i=1; $i<=$pages_fd; $i++)
-                        echo ' <a href="'.$submit_link.'page='.$i.'&what='.$what.'&order='.$order.'" class="link01">'.$i.'</a> ';
-                    echo "</p>";
-                }
-
                 $sql_query .= "ORDER BY `$what` $order LIMIT ".(($number-1)*$number_per_page).", $number_per_page";
-                $result = mysql_query($sql_query);
+                $this->db->dbQuery($sql_query);
 
-                if (!mysql_num_rows($result))
+                if (!$this->db->mysqlRows())
                     echo "<p>Совпадений не найдено!</p>";
                 else
                 {
@@ -158,10 +161,25 @@ class Controller
                             </th>
                         </tr>
                     ';
-                    while($row = mysql_fetch_assoc($result))
+                    $result_arr = $this->db->fetchAssocArray();
+                    foreach ($result_arr as $row)
                         echo "<tr><td><p><label>$row[word]</label></p><td><p>$row[frequency]</p></td></tr>";
                     echo '</table>';
                 }
+
+                if ($pages_fd>1)
+                {
+                    echo "<p>";
+                    for ($i=1; $i<=$pages_fd; $i++)
+                    {
+                        if ($i == $number)
+                            $active = " active";
+                        else $active = "";
+                        echo ' <a href="'.$submit_link.'page='.$i.'&what='.$what.'&order='.$order.'" class="link01 link02'.$active.'">'.$i.'</a> ';
+                    }
+                    echo "</p>";
+                }
+
                 break;
             case "gui":
             default:

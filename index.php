@@ -21,13 +21,10 @@ require_once("Dictionary.php");
 require_once("Utils.php");
 require_once("MysqlWrapper.php");
 
-
-$link = mysql_connect("localhost", "dina", "123")
-    or die("Could not connect: " . mysql_error());
-mysql_select_db("simbirsoft", $link) or die ("Can't use foo : ".mysql_error());
-mysql_query("SET NAMES utf8");
+$db = MysqlWrapper::getInstance("localhost", "dina", "123", "simbirsoft");
+$db->dbQuery("SET NAMES utf8");
 
 $controller = new Controller();
 $controller->init();
 
-mysql_close($link);
+$db->close();

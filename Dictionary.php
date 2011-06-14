@@ -10,6 +10,7 @@
 class Dictionary
 {
     private $dictionary_text_array;
+    private $db;
 
     /**
      * Return dictionary array
@@ -27,6 +28,7 @@ class Dictionary
      * */
     function __construct($dictionary_file_path)
     {
+        $this->db = MysqlWrapper::getInstance();
         if (file_exists($dictionary_file_path) && is_readable($dictionary_file_path))
         {
             $file_size = filesize($dictionary_file_path);
@@ -70,15 +72,11 @@ class Dictionary
             $dictionary_array = array_unique($dictionary_array);
 
 
-
-
-            $query= 'INSERT IGNORE INTO dictionary (`word`)
+            $sql_query= 'INSERT IGNORE INTO dictionary (`word`)
                      VALUES ("'.implode('") , ("', $dictionary_array).'")';
 
-            mysql_query($query);
+            $this->db->dbQuery($sql_query);
 
-
-            
             $dictionary_text  = implode(" ", $dictionary_array);
 
             $new_text = wordwrap($dictionary_text, 32000, "///");
