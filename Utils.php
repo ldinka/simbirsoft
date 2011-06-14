@@ -23,14 +23,14 @@ class Utils
         ob_flush();
     }
 
-    private function FileRead($filename){
+    private static function FileRead($filename){
 	$handle = fopen($filename, "r");
 	$content = @fread($handle, filesize($filename));
 	fclose($handle);
 	return $content;
 }
 
-    private function ApplyTemplateData($template, $params = Array()){
+    private static function ApplyTemplateData($template, $params = Array()){
         foreach($params as $k => $p){
             if(!is_int($k)){
                 $cmd = '$'.$k.' = $p;';
@@ -45,6 +45,6 @@ class Utils
     }
 
     public static function ApplyTemplate($tpl_name, $params = Array()){
-        return ApplyTemplateData(FileRead($tpl_name), $params);
+        return Utils::ApplyTemplateData(Utils::FileRead($tpl_name), $params);
     }
 }

@@ -12,40 +12,8 @@ class Article
     private $time_out = 180; // установка времени (сек.), по истечении которого скрипт заканчивает обработку файлов
     private $db;
 
-    private $header = '
-        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-        <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-        <head>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-        <style>
-            html, body {
-                font: 12px/16px Arial;
-            }
-            h1 {
-                color: #00438F;
-                font-size: 16px;
-                padding: 20px 40px;
-            }
-            label {
-                font-size: 14px;
-                display: inline-block;
-                width: 300px;
-            }
-            p {
-                margin: 6px 0;
-            }
-            b i, i b {
-                background: #FF9393;
-            }
-        </style>
-
-        </head>
-        <body>
-    ';
-    private $footer = '
-        </body>
-        </html>
-    ';
+    private $header = '';
+    private $footer = '';
 
     private $number_of_strings;
     private $part_of_text = "";
@@ -64,6 +32,9 @@ class Article
     {
         $this->file_path = $article_file_path;
         $this->db = MysqlWrapper::getInstance();
+
+        $this->header = Utils::ApplyTemplate("templates/header.php");
+        $this->footer = Utils::ApplyTemplate("templates/footer.php");
     }
 
     public function process($dictionary_text_array)
