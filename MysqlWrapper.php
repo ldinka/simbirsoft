@@ -9,13 +9,12 @@
  
 class MysqlWrapper {
 
-    // Store the single instance of Database
     private static $instance;
 
-    private    $server   = ""; //database server
-    private    $user     = ""; //database login name
-    private    $pass     = ""; //database login password
-    private    $database = ""; //database name
+    private    $server   = "";
+    private    $user     = "";
+    private    $pass     = "";
+    private    $database = "";
 
     private    $link_id = 0;
     private    $query_id = 0;
@@ -23,7 +22,7 @@ class MysqlWrapper {
     private function __construct ($server = null, $user = null, $pass = null, $database = null)
     {
         if ($server === null || $user === null || $database === null)
-            throw new Exception("Database information must be passed in when the object is first created.");
+            throw new Exception("Не указаны параметры соединения с базой данных.");
 
         $this->server   = $server;
         $this->user     = $user;
@@ -45,10 +44,10 @@ class MysqlWrapper {
         $this->link_id = mysql_connect ($this->server, $this->user, $this->pass, $new_link);
 
         if (!$this->link_id)
-            throw new Exception("Could not connect to server: <b>$this->server</b>.");
+            throw new Exception("Соединение с сервером не установлено: <b>$this->server</b>.");
 
         if (!mysql_select_db($this->database, $this->link_id))
-            throw new Exception("Could not open database: <b>$this->database</b>.");
+            throw new Exception("Соединение с базой данных не установлено: <b>$this->database</b>.");
 
         $this->server   = "";
         $this->user     = "";

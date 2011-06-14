@@ -21,10 +21,17 @@ require_once("Dictionary.php");
 require_once("Utils.php");
 require_once("MysqlWrapper.php");
 
-$db = MysqlWrapper::getInstance("localhost", "dina", "123", "simbirsoft");
-$db->dbQuery("SET NAMES utf8");
+try
+{
+    $db = MysqlWrapper::getInstance("localhost", "dina", "123", "simbirsoft");
+    $db->dbQuery("SET NAMES utf8");
 
-$controller = new Controller();
-$controller->init();
+    $controller = new Controller();
+    $controller->init();
 
-$db->close();
+    $db->close();
+}
+catch(Exception $e)
+{
+    echo Utils::ApplyTemplate("templates/error.php", array("error"=>$e->getMessage()));
+}

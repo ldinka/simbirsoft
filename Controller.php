@@ -24,7 +24,6 @@ class Controller
 
         $this->view->showHeader();
 
-
         try
         {
             $this->run();
@@ -47,7 +46,7 @@ class Controller
         $module = isset($_REQUEST["module"])?$_REQUEST["module"]:"";
         switch ($module)
         {
-            case "fd":
+            case "fd":  #frequency dictionary page
                 echo '
                     <div id="header">
                     <a href="index.php?module=gui" class="link03">Graphical User Interface</a>
@@ -74,7 +73,7 @@ class Controller
 
                 foreach ($abc_array as $key => $letter)
                 {
-                    $this->db->dbQuery('SELECT `word` FROM `dictionary` WHERE `word` LIKE "'.$letter.'%" ORDER BY word ASC');
+                    $this->db->dbQuery('SELECT `word` FROM `dictionary` WHERE `word` LIKE "'.$letter.'%" LIMIT 1');
 
                     $temp_array = $this->db->fetchAssocArray();
                     if (!empty($temp_array))
@@ -181,7 +180,7 @@ class Controller
                 }
 
                 break;
-            case "gui":
+            case "gui":  #graphical user interface page
             default:
                 $this->view->showGUI();
                 $err = array();
@@ -262,10 +261,6 @@ class Controller
                         $this->view->showError($err);
                 }
                 break;
-
         }
-
-
-
     }
 }
