@@ -9,6 +9,8 @@ ini_set('safe_mode_gid',"1");
 ini_set('safe_mode',"1");
 ini_set('max_execution_time',0);
 ini_set("output_buffering", "0");
+ini_set('zlib.output_compression', 0);
+ini_set('implicit_flush', 1);
 set_time_limit(0);
 error_reporting(E_ALL);
 ini_set('display_errors',"1");
@@ -20,6 +22,8 @@ require_once("Article.php");
 require_once("Dictionary.php");
 require_once("Utils.php");
 require_once("MysqlWrapper.php");
+
+@ob_end_clean();
 
 try
 {

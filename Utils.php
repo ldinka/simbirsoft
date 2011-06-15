@@ -18,9 +18,9 @@ class Utils
 
     static function f_flush ($string)
     {
+        ob_implicit_flush(1);
         echo $string;
-        flush();
-        ob_flush();
+        ob_implicit_flush(0);
     }
 
     private static function FileRead($filename){
