@@ -16,13 +16,6 @@ error_reporting(E_ALL);
 ini_set('display_errors',"1");
 setlocale(LC_ALL,"ru_RU.UTF-8");
 
-require_once("View.php");
-require_once("Controller.php");
-require_once("Article.php");
-require_once("Dictionary.php");
-require_once("Utils.php");
-require_once("MysqlWrapper.php");
-
 @ob_end_clean();
 
 try
@@ -38,4 +31,9 @@ try
 catch(Exception $e)
 {
     echo Utils::ApplyTemplate("templates/error.php", array("error"=>$e->getMessage()));
+}
+
+function __autoload ($className)
+{
+    require_once "$className.php";
 }
