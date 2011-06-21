@@ -9,6 +9,11 @@
  
 class View
 {
+    function showTemplate($nameTemplate, $arrayTemplate=array())
+    {
+        echo Utils::ApplyTemplate("templates/$nameTemplate.php", $arrayTemplate);
+    }
+
     function showHeader()
     {
         echo Utils::ApplyTemplate("templates/header.php");
@@ -19,9 +24,9 @@ class View
         echo Utils::ApplyTemplate("templates/footer.php");
     }
 
-    function showError($err)
+    function showError($errors)
     {
-        foreach($err as $error)
+        foreach($errors as $error)
         {
             echo '<p><span class="error">'.$error.'</span></p>';
         }

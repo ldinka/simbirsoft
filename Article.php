@@ -12,8 +12,7 @@ class Article
     private $time_out = 180; // установка времени (сек.), по истечении которого скрипт заканчивает обработку файлов
     private $db;
 
-    private $header = '';
-    private $footer = '';
+    private $view;
 
     private $number_of_strings;
     private $part_of_text = "";
@@ -32,15 +31,13 @@ class Article
     {
         $this->file_path = $article_file_path;
         $this->db = MysqlWrapper::getInstance();
-
-        $this->header = Utils::ApplyTemplate("templates/header.php");
-        $this->footer = Utils::ApplyTemplate("templates/footer.php");
+        $this->view = new View();
     }
 
     public function process($dictionary_text_array)
     {
-        Utils::f_flush('<p id="process">Processing ');
-         $this->pages_str .= "<p>Pages: ";
+        $this->view->showTemplate("process");
+        $this->pages_str .= "<p>Pages: ";
         $time_out = $this->time_out;
         $time_start = microtime(true);
         $article_file_path = $this->file_path;
@@ -69,7 +66,7 @@ class Article
                 while ($part_size < $file_size && (microtime(true) - $time_start) < $time_out);
 
                 if ($part_size < $file_size)
-                    echo "<p>Скрипт был прерван после $this->number_of_iteration-й итерации</p>";
+                    $this->view->showTemplate("break", array("number_of_iteration"=>$this->number_of_iteration));
             }
             else
             {
@@ -163,7 +160,6 @@ class Article
 
         $path = dirname(__FILE__);
 
-        $k = 0;
         $sign_arr = array(
                     '.' , '?' , '!' , '…' ,
                     '.»', '?»', '!»', '…»',
@@ -224,11 +220,25 @@ class Article
                 $k = ++$this->number_of_iteration;
                 $file_name          = $path."/files00/".$k.".html";
                 $resource_html_file = fopen($file_name, "w");
-                fwrite($resource_html_file, $this->header . $part_str . $this->footer);
+
+                ob_start();
+                $this->view->showTemplate("header");
+                echo $part_str;
+                $this->view->showTemplate("footer");
+                
+                fwrite($resource_html_file, ob_get_contents());
                 fclose($resource_html_file);
+                ob_end_clean();
+
                 chmod($file_name, 0666);
-                $this->pages_str .= ' <a target="_blank" href="files00/'.$k.'.html" class="link01">'.$k.'</a> ';
             }
+        }
+        if ($k)
+        {
+            ob_start();
+            $this->view->showTemplate("pages", array("pages"=>$k));
+            $this->pages_str .= ob_get_contents();
+            ob_end_clean();
         }
     }
 }

@@ -30,7 +30,7 @@ try
 }
 catch(Exception $e)
 {
-    echo Utils::ApplyTemplate("templates/error.php", array("error"=>$e->getMessage()));
+    echo Utils::ApplyTemplate("templates/error.php", array("errors"=>$e->getMessage()));
 }
 
 function __autoload ($className)
