@@ -13,7 +13,7 @@ class View
     {
         echo Utils::ApplyTemplate("templates/$nameTemplate.php", $arrayTemplate);
     }
-
+/*
     function showHeader()
     {
         echo Utils::ApplyTemplate("templates/header.php");
@@ -31,15 +31,15 @@ class View
             echo '<p><span class="error">'.$error.'</span></p>';
         }
     }
-
+*/
     function showPages($pages)
     {
         echo $pages;
     }
-
+/*
     function showGUI()
     {
         echo Utils::ApplyTemplate("templates/gui.php");
     }
-
+*/
 }

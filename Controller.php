@@ -11,7 +11,6 @@ class Controller
 {
     private $view;
     private $fd;
-    //private $db;
 
     function __construct()
     {
@@ -23,10 +22,7 @@ class Controller
     public function init()
     {
         $time_start = microtime(true);
-
-        //$this->view->showHeader();
         $this->view->showTemplate("header");
-
         try
         {
             $this->run();
@@ -34,17 +30,11 @@ class Controller
         catch (Exception $e)
         {
             $this->view->showTemplate("error", array("errors"=>$e->getMessage()));
-            //echo '<p><span class="error">'.$e->getMessage().'</span></p>';
         }
-
         $time_end = microtime(true);
         $time     = $time_end - $time_start;
         $this->view->showTemplate("time", array("time"=>$time));
-        //echo "<p>Скрипт выполнялся $time секунд\n</p>";
-
         $this->view->showTemplate("footer");
-        //$this->view->showFooter();
-
     }
 
     private function run()
@@ -57,7 +47,8 @@ class Controller
                 break;
             case "gui":  #graphical user interface page
             default:
-                $this->view->showGUI();
+                //$this->view->showGUI();
+                $this->view->showTemplate("gui");
                 $err = array();
                 if (isset($_REQUEST['go']))
                 {
@@ -133,7 +124,8 @@ class Controller
                         $this->view->showPages($pages);
                     }
                     else
-                        $this->view->showError($err);
+                        //$this->view->showError($err);
+                        $this->view->showTemplate("error", array("errors"=>$err));
                 }
                 break;
         }
