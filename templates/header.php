@@ -11,19 +11,72 @@
 </script>
 <script type="text/javascript" src="/scripts/jquery-1.6.1.min.js"></script>
 <script type="text/javascript">
+function changeTableFD (letter_id)
+{
+    $(".sorting").removeClass("active");
+    if (letter_id == null)
+    {
+        letter = "#all";
+        letter_id = "all";
+    }
+    else
+    {
+        letter = "#letter" + letter_id;
+    }
+    $("#abc .active").removeClass("active");
+    $(letter).addClass("active");
     $.ajax({
         type : "POST",
         dataType: "json",
-        url  : "vote.php",
-        data : "",
+        url  : "index.php",
+        data : "ajax=yes&filter=letter&letter="+letter_id,
         success: function(msg){
             result_table = "";
             cnt = msg.words.length;
-
             $.each(msg.words, function(i, val){
                result_table += "<tr><td><p><label>" + msg.words[i].name + "</label></p><td><p>" + msg.words[i].count + "</p></td></tr>";
             });
-            //alert($("tbody").html());
+            $("tbody").html(result_table);
+            result_pages = "";
+            if (msg.pages == 1)
+            {
+                $("#pages").html("");
+            }
+            else
+            {
+                for (i=1; i<=msg.pages; i++)
+                {
+                    result_pages += ' <a onclick="return paginator(' + i + ');" href="' + msg.submit_link + 'page=' + i + '" class="link01 link02" id="page' + i + '">' + i + '</a> ';
+                }
+                $("#pages").html(result_pages);
+                $("#page1").addClass("active");
+            }
+        },
+        error: function(err)
+        {
+            console.log(err);
+        }
+    });
+    return false;
+}
+
+function sorting (order, what)
+{
+    letter_id = $("#abc .active").attr("id").replace("letter", "");
+    page = $("#pages .active").attr("id").replace("page", "");
+    $(".sorting").removeClass("active");
+    $("#"+what+"_"+order).addClass("active");
+    $.ajax({
+        type : "POST",
+        dataType: "json",
+        url  : "index.php",
+        data : "ajax=yes&filter=sorting&letter="+letter_id+"&what="+what+"&page="+page+"&order="+order,
+        success: function(msg){
+            result_table = "";
+            cnt = msg.words.length;
+            $.each(msg.words, function(i, val){
+               result_table += "<tr><td><p><label>" + msg.words[i].name + "</label></p><td><p>" + msg.words[i].count + "</p></td></tr>";
+            });
             $("tbody").html(result_table);
         },
         error: function(err)
@@ -31,6 +84,44 @@
             console.log(err);
         }
     });
+    return false;
+}
+
+function paginator (page)
+{
+    letter_id = $("#abc .active").attr("id").replace("letter", "");
+    $("#pages .active").removeClass("active");
+    $("#page"+page).addClass("active");
+    if ($(".sorting.active").html() == "прямо" || $(".sorting.active").html() == "обратно")
+    {
+        what = $(".sorting.active").attr("id").replace(/asc|desc|_/gi, "");
+        order = $(".sorting.active").attr("id").replace(/word|frequency|_/gi, "");
+    }
+    else
+    {
+        what = "";
+        order = "";
+    }
+    $.ajax({
+        type : "POST",
+        dataType: "json",
+        url  : "index.php",
+        data : "ajax=yes&filter=paginator&letter="+letter_id+"&what="+what+"&page="+page+"&order="+order,
+        success: function(msg){
+            result_table = "";
+            cnt = msg.words.length;
+            $.each(msg.words, function(i, val){
+               result_table += "<tr><td><p><label>" + msg.words[i].name + "</label></p><td><p>" + msg.words[i].count + "</p></td></tr>";
+            });
+            $("tbody").html(result_table);
+        },
+        error: function(err)
+        {
+            console.log(err);
+        }
+    });
+    return false;
+}
 </script>
 <style>
     html, body {

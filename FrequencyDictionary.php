@@ -39,7 +39,7 @@ class frequencyDictionary {
         {
             $this->db->dbQuery('SELECT `word` FROM `dictionary` WHERE `word` LIKE "'.$letter.'%" LIMIT 1');
             $temp_array = $this->db->fetchAssocArray();
-            $this->view->showTemplate("fd.abc", array("temp_array"=>$temp_array, "letter_id"=>$letter_id, "key"=>$key, "submit_link"=>$submit_link, "letter"=>$letter));
+            $this->view->showTemplate("fd.abc", array("temp_array"=>$temp_array, "letter_id"=>$letter_id, "key"=>$key, "submit_link"=>$submit_link, "letter"=>$letter, "page"=>$page));
         }
         $this->view->showTemplate("fd.search", array("submit_link"=>$submit_link, "search"=>$search, "frequency_from"=>$frequency_from, "frequency_to"=>$frequency_to));
         $sql_query = "SELECT * FROM `dictionary` ";

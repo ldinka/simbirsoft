@@ -3,14 +3,14 @@
     <tr>
         <th>
             <p>Слово
-                <a href="<?=$submit_link?>page=<?=$page?>&what=word&order=asc">прямо</a>
-                <a href="<?=$submit_link?>page=<?=$page?>&what=word&order=desc">обратно</a>
+                <a onclick="return sorting('asc', 'word');" href="<?=$submit_link?>page=<?=$page?>&what=word&order=asc" class="sorting" id="word_asc">прямо</a>
+                <a onclick="return sorting('desc', 'word');" href="<?=$submit_link?>page=<?=$page?>&what=word&order=desc" class="sorting" id="word_desc">обратно</a>
             </p>
         </th>
         <th>
             <p>Частота
-                <a href="<?=$submit_link?>page=<?=$page?>&what=frequency&order=asc">прямо</a>
-                <a href="<?=$submit_link?>page=<?=$page?>&what=frequency&order=desc">обратно</a>
+                <a onclick="return sorting('asc', 'frequency');" href="<?=$submit_link?>page=<?=$page?>&what=frequency&order=asc" class="sorting" id="frequency_asc">прямо</a>
+                <a onclick="return sorting('desc', 'frequency');" href="<?=$submit_link?>page=<?=$page?>&what=frequency&order=desc" class="sorting" id="frequency_desc">обратно</a>
             </p>
         </th>
     </tr>
