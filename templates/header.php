@@ -2,8 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-<script type="text/javascript" src="/scripts/jquery-1.6.1.min.js"></script>
-<script type="text/javascript" src="/scripts/functions.js"></script>
+<script type="text/javascript" src="scripts/jquery-1.6.1.min.js"></script>
+<script type="text/javascript" src="scripts/functions.js"></script>
 
 <style>
     html, body {
