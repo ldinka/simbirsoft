@@ -146,7 +146,7 @@ function paginator (page)
     search = $("#search").val();
     frequency_from = $("#frequency_from").val();
     frequency_to = $("#frequency_to").val();
-    if (search || frequency_from > 0 || (frequency_to != null && frequency_to >= 0))
+    if (search || frequency_from > 0 || (frequency_to != "" && frequency_to >= 0))
     {
         data_request = "ajax=yes&filter=searching&search="+search+"&frequency_from="+frequency_from+"&frequency_to="+frequency_to+"&page="+page+"&what="+what+"&order="+order;
     }
