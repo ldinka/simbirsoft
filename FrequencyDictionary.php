@@ -18,6 +18,98 @@ class frequencyDictionary {
         $this->db = MysqlWrapper::getInstance();
     }
 
+    public function ajax_init()
+    {
+        $output = "";
+        $submit_link     = "index.php?module=fd&";
+        $filter = isset($_REQUEST["filter"])?addslashes($_REQUEST["filter"]):"";
+
+        $number_per_page = 50;
+        $page            = (isset($_REQUEST["page"]) && intval($_REQUEST["page"]) > 0)?intval($_REQUEST["page"]):1;
+        $what            = (isset($_REQUEST["what"])&&($_REQUEST["what"] == "word" || $_REQUEST["what"] == "frequency"))?$_REQUEST["what"]:"word";
+        $order           = (isset($_REQUEST["order"])&&($_REQUEST["order"] == "asc" || $_REQUEST["order"] == "desc"))?$_REQUEST["order"]:"asc";
+        $search          = (isset($_REQUEST["search"]))?mysql_real_escape_string($_REQUEST["search"]):"";
+        $frequency_from  = (isset($_REQUEST["frequency_from"]) && intval($_REQUEST["frequency_from"]) >= 0)?intval($_REQUEST["frequency_from"]):0;
+        $frequency_to    = (isset($_REQUEST["frequency_to"]) && $_REQUEST["frequency_to"] !== "")?intval($_REQUEST["frequency_to"]):(-1);
+        $frequency_to    = ($frequency_to < 0 && $frequency_to != -1)?(-1):$frequency_to;
+        $letter_id       = (isset($_REQUEST["letter"]) && $_REQUEST["letter"] != "all")?intval($_REQUEST["letter"]):"all";
+
+        $abc_array = array("а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+
+        $sql_query = "SELECT * FROM `dictionary` ";
+
+
+        switch ($filter)
+        {
+            case "letter":
+            case "sorting":
+            case "paginator":
+                $submit_link .= "letter=$letter_id&";
+                if ($letter_id !== "all")
+                {
+                    $sql_query .= ' WHERE `word` LIKE "'.$abc_array[$letter_id].'%" ';
+                }
+                break;
+            case "searching":
+                if ($search || $frequency_from > 0 || $frequency_to >= 0)
+                {
+                    $sql_query .= " WHERE ";
+                    if ($search)
+                    {
+                        $sql_query .= ' `word` LIKE "'.$search.'%" AND ';
+                        $submit_link .= "search=$search&";
+                    }
+                    if ($frequency_to != -1 && $frequency_from > $frequency_to)
+                    {
+                        $temp_var = $frequency_from;
+                        $frequency_from = $frequency_to;
+                        $frequency_to = $temp_var;
+                    }
+                    $sql_query .= ' `frequency`>='.$frequency_from.' ';
+                    $submit_link .= "frequency_from=$frequency_from&";
+                    if ($frequency_to != -1)
+                    {
+                        $sql_query .= ' AND `frequency`<='.$frequency_to.' ';
+                        $submit_link .= "frequency_to=$frequency_to&";
+                    }
+                }
+                break;
+            default:
+                $submit_link .= "letter=$letter_id&";
+                break;
+        }
+
+        $this->db->dbQuery($sql_query);
+        $word_array = $this->db->fetchAssocArray();
+        $count = count($word_array);
+        $pages_fd = ceil($count/$number_per_page);
+
+        $sql_query .= "ORDER BY `$what` $order LIMIT ".(($page-1)*$number_per_page).", $number_per_page";
+
+        $res = $this->db->dbQuery($sql_query);
+
+        $out_string = "";
+        $out_string .= '{"pages":'.$pages_fd.', ';
+        $out_string .= ' "submit_link":"'.$submit_link.'", ';
+        $out_string .= ' "words": [';
+
+        if (!$this->db->mysqlRows())
+            $output = '{"error":"Совпадений не найдено!"}';
+        else
+        {
+            $out = array();
+            while ($row = mysql_fetch_assoc($res))
+            {
+                $out[] = '{"name":"'.$row["word"].'", "count":'.$row["frequency"].'}';
+            }
+            $out_string .= implode(",",$out);
+            $out_string .= "]}";
+
+            $output = $out_string;
+        }
+        return $output;
+    }
+
     public function init()
     {
 

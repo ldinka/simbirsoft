@@ -8,6 +8,15 @@
         document.getElementById("submit").style.display = "none";
         document.getElementById("preloader").style.display = "block";
     }
+
+    function showPreloader()
+    {
+        $("#preloader").show();
+    }
+    function hidePreloader()
+    {
+        $("#preloader").hide();
+    }
 </script>
 <script type="text/javascript" src="/scripts/jquery-1.6.1.min.js"></script>
 <script type="text/javascript">
@@ -28,12 +37,14 @@ function changeTableFD (letter_id)
     }
     $("#abc .active").removeClass("active");
     $(letter).addClass("active");
+    showPreloader();
     $.ajax({
         type : "GET",
         dataType: "json",
         url  : "index.php",
         data : "ajax=yes&filter=letter&letter="+letter_id,
         success: function(msg){
+            hidePreloader();
             result_table = "";
             cnt = msg.words.length;
             $.each(msg.words, function(i, val){
@@ -57,6 +68,7 @@ function changeTableFD (letter_id)
         },
         error: function(err)
         {
+            hidePreloader();
             console.log(err);
         }
     });
@@ -86,12 +98,14 @@ function sorting (order, what)
     {
         data_request = "ajax=yes&filter=sorting&letter="+letter_id+"&what="+what+"&page="+page+"&order="+order;
     }
+    showPreloader();
     $.ajax({
         type : "GET",
         dataType: "json",
         url  : "index.php",
         data : data_request,
         success: function(msg){
+            hidePreloader();
             result_table = "";
             cnt = msg.words.length;
             $.each(msg.words, function(i, val){
@@ -101,6 +115,7 @@ function sorting (order, what)
         },
         error: function(err)
         {
+            hidePreloader();
             console.log(err);
         }
     });
@@ -138,12 +153,14 @@ function paginator (page)
     {
         data_request = "ajax=yes&filter=paginator&letter="+letter_id+"&what="+what+"&page="+page+"&order="+order;
     }
+    showPreloader();
     $.ajax({
         type : "GET",
         dataType: "json",
         url  : "index.php",
         data : data_request,
         success: function(msg){
+            hidePreloader();
             result_table = "";
             cnt = msg.words.length;
             $.each(msg.words, function(i, val){
@@ -153,6 +170,7 @@ function paginator (page)
         },
         error: function(err)
         {
+            hidePreloader();
             console.log(err);
         }
     });
@@ -169,12 +187,14 @@ function searching ()
     $("#frequency_from").val(frequency_from);
     frequency_to = $("#frequency_to").val();
     $("#frequency_to").val(frequency_to);
+    showPreloader();
     $.ajax({
         type : "GET",
         dataType: "json",
         url  : "index.php",
         data : "ajax=yes&filter=searching&search="+search+"&frequency_from="+frequency_from+"&frequency_to="+frequency_to,
         success: function(msg){
+            hidePreloader();
             result_table = "";
             if (!msg.error)
             {
@@ -207,6 +227,7 @@ function searching ()
         },
         error: function(err)
         {
+            hidePreloader();
             console.log(err);
         }
     });

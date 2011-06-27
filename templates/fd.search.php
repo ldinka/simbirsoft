@@ -7,3 +7,4 @@
          <input onclick="return searching();" type="submit" value="Поиск"/>
     </p>
 </form>
+<p><img id="preloader" src="preloader.gif" alt="Идет обработка, подождите..." />&nbsp;</p>
