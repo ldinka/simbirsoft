@@ -19,5 +19,5 @@
 <?foreach ($result_arr as $row):?>
     <tr><td><p><label><?=$row["word"]?></label></p><td><p><?=$row["frequency"]?></p></td></tr>
 <?endforeach;?>
-    <t/body>
+    </tbody>
 </table>

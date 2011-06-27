@@ -52,21 +52,48 @@ class Controller
             $abc_array = array("а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
 
             $sql_query = "SELECT * FROM `dictionary` ";
-            $submit_link .= "letter=$letter_id&";
+
 
             switch ($filter)
             {
                 case "letter":
                 case "sorting":
                 case "paginator":
+                    $submit_link .= "letter=$letter_id&";
                     if ($letter_id !== "all")
                     {
                         $sql_query .= ' WHERE `word` LIKE "'.$abc_array[$letter_id].'%" ';
                     }
                     break;
+                case "searching":
+                    if ($search || $frequency_from > 0 || $frequency_to >= 0)
+                    {
+                        $sql_query .= " WHERE ";
+                        if ($search)
+                        {
+                            $sql_query .= ' `word` LIKE "'.$search.'%" AND ';
+                            $submit_link .= "search=$search&";
+                        }
+                        if ($frequency_to != -1 && $frequency_from > $frequency_to)
+                        {
+                            $temp_var = $frequency_from;
+                            $frequency_from = $frequency_to;
+                            $frequency_to = $temp_var;
+                        }
+                        $sql_query .= ' `frequency`>='.$frequency_from.' ';
+                        $submit_link .= "frequency_from=$frequency_from&";
+                        if ($frequency_to != -1)
+                        {
+                            $sql_query .= ' AND `frequency`<='.$frequency_to.' ';
+                            $submit_link .= "frequency_to=$frequency_to&";
+                        }
+                    }
+                    break;
                 default:
+                    $submit_link .= "letter=$letter_id&";
                     break;
             }
+
             $this->db->dbQuery($sql_query);
             $word_array = $this->db->fetchAssocArray();
             $count = count($word_array);
